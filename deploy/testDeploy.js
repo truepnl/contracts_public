@@ -12,6 +12,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         constructorArguments: args,
       });
     } catch (e) {
+      console.log(e);
       console.log(`${e.name} - ${e.message}`);
     }
   };
@@ -62,7 +63,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     args: args,
     log: true,
   });
-  tryVerify(
+
+  await tryVerify(
     vestedPool.address,
     args,
     "contracts/Pools/VestedPool.sol:VestedPool"
