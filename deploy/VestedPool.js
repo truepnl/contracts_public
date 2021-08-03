@@ -18,6 +18,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log: true,
   });
   await tryVerify(poolToken.address, tokenArgs);
+
   const USDT = await deploy("USDT", {
     from: deployer,
     args: tokenArgs,

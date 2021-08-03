@@ -74,7 +74,7 @@ contract VestedPool is Pool {
         return (allocations[user].claimed == allocations[user].amount);
     }
 
-    function nextClaimingAt(address wallet) external view returns (uint256) {
+    function nextClaimingAt(address wallet) public view returns (uint256) {
         if (canClaim(wallet)) return block.timestamp;
         if (block.timestamp < startDate) return startDate;
 
@@ -83,7 +83,22 @@ contract VestedPool is Pool {
         return startDate + passedThisPeriod + unlockPeriod;
     }
 
-    function remained(address wallet) external view returns (uint256) {
+    function remained(address wallet) public view returns (uint256) {
         return allocations[wallet].amount - allocations[wallet].claimed;
+    }
+
+    function claimingInfo(address wallet)
+        external
+        view
+        returns (
+            uint256 allocation,
+            uint256 claimed,
+            uint256 remainedToClaim,
+            uint256 available,
+            bool _canClaim,
+            uint256 _nextClaimingAt
+        )
+    {
+        return (allocations[wallet].amount, allocations[wallet].claimed, remained(wallet), getClaimableTokens(wallet), canClaim(wallet), nextClaimingAt(wallet));
     }
 }
