@@ -29,9 +29,9 @@ contract VestedPool is Pool {
         poolType = PoolTypes.Vested;
 
         initialUnlock = _initialUnlock;
-        unlockPeriod = _unlockPeriod * 1 days;
-        totalUnlock = _totalUnlock * 1 days;
-        cliff = _cliff * 1 days;
+        unlockPeriod = _unlockPeriod;
+        totalUnlock = _totalUnlock;
+        cliff = _cliff;
         unlockPerPeriod = _unlockPerPeriod;
     }
 
@@ -40,13 +40,15 @@ contract VestedPool is Pool {
     }
 
     function getClaimableTokens(address user) public view returns (uint256) {
-        if (block.timestamp < startDate + cliff) return 0;
+        if (block.timestamp < startDate + cliff || !hasBought(user)) return 0;
 
+        uint256 tokensToClaimAfterPurchase = (allocations[user].amount * initialUnlock) / ONE_HUNDRED_PERCENT;
+        uint256 tokenstToClaimPerPeriod = (allocations[user].amount * unlockPerPeriod) / ONE_HUNDRED_PERCENT;
         uint256 claimed = allocations[user].claimed;
         uint256 amount = allocations[user].amount;
-        if (block.timestamp >= totalUnlock + startDate + cliff || claimed + unlockPerPeriod > amount) return amount - claimed;
+        if (block.timestamp >= totalUnlock + startDate + cliff || claimed + tokenstToClaimPerPeriod > amount) return amount - claimed;
 
-        uint256 claimable = ((block.timestamp - startDate - cliff) / unlockPeriod) * unlockPerPeriod - claimed;
+        uint256 claimable = ((block.timestamp - startDate - cliff) / unlockPeriod) * tokenstToClaimPerPeriod + tokensToClaimAfterPurchase - claimed;
 
         return claimable;
     }
@@ -56,6 +58,9 @@ contract VestedPool is Pool {
 
         uint256 tokensToClaimAfterPurchase = (allocations[msg.sender].amount * initialUnlock) / ONE_HUNDRED_PERCENT;
         allocations[msg.sender].claimed = tokensToClaimAfterPurchase;
+        allocations[msg.sender].claimedAt = block.timestamp;
+
+        poolToken.transfer(msg.sender, tokensToClaimAfterPurchase);
 
         emit Claimed(msg.sender, tokensToClaimAfterPurchase);
     }
@@ -65,6 +70,7 @@ contract VestedPool is Pool {
         require(claimable > 0, "Nothing to claim");
 
         allocations[msg.sender].claimed += claimable;
+        allocations[msg.sender].claimedAt = block.timestamp;
         poolToken.transfer(msg.sender, claimable);
 
         emit Claimed(msg.sender, claimable);
@@ -75,12 +81,10 @@ contract VestedPool is Pool {
     }
 
     function nextClaimingAt(address wallet) public view returns (uint256) {
-        if (canClaim(wallet)) return block.timestamp;
-        if (block.timestamp < startDate) return startDate;
+        if (canClaim(wallet) || !hasBought(wallet)) return 0;
+        uint256 periodsPassed = (allocations[wallet].claimedAt - startDate) / unlockPeriod;
 
-        uint256 passedThisPeriod = (block.timestamp - startDate) % unlockPeriod;
-
-        return startDate + passedThisPeriod + unlockPeriod;
+        return startDate + unlockPeriod * (periodsPassed + 1);
     }
 
     function remained(address wallet) public view returns (uint256) {

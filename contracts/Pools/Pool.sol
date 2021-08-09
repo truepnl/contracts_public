@@ -17,8 +17,9 @@ abstract contract Pool is Ownable {
         bool bought;
         uint256 claimed;
         uint256 rate;
+        uint256 claimedAt;
     }
-    mapping(address => Allocation) allocations;
+    mapping(address => Allocation) public allocations;
 
     IERC20 public paymentToken;
     IERC20 public poolToken;
@@ -28,14 +29,13 @@ abstract contract Pool is Ownable {
 
     uint256 public paymentsReceived;
     uint256 public tokensSold;
-    uint256 public tokensRemained;
 
     uint256 private _divider = 1000;
 
     event TokensBought(address participant, uint256 amount, uint256 spent);
 
     function saleActive() public view returns (bool) {
-        return (block.timestamp < startDate || block.timestamp > closeDate);
+        return (block.timestamp >= startDate && block.timestamp <= closeDate);
     }
 
     function canBuy(address wallet) public view returns (bool) {
@@ -54,8 +54,8 @@ abstract contract Pool is Ownable {
 
     function buy() public virtual {
         require(saleActive(), "The sale is not active");
-        require(canBuy(msg.sender), "You can't buy tokens");
-        require(!hasBought(msg.sender), "You've already bought tokens");
+        require(canBuy(msg.sender), "You cant buy tokens");
+        require(!hasBought(msg.sender), "Youve already bought tokens");
 
         uint256 rate = allocations[msg.sender].rate;
         uint256 amount = allocations[msg.sender].amount;
@@ -66,6 +66,10 @@ abstract contract Pool is Ownable {
         allocations[msg.sender].bought = true;
 
         paymentToken.transferFrom(msg.sender, address(this), paymentToReceive);
+
+        tokensSold += amount;
+        paymentsReceived += paymentToReceive;
+
         emit TokensBought(msg.sender, amount, paymentToReceive);
     }
 

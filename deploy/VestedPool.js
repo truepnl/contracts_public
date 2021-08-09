@@ -27,6 +27,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   await tryVerify(USDT.address, tokenArgs);
 
   const day = 86400;
+  const hour = day / 24;
+
   const pt10 = (1e17).toString();
 
   const args = [
@@ -35,8 +37,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     Date.now(),
     Date.now() + day,
     pt10,
-    day,
-    day * 9,
+    hour,
+    hour * 9,
     0,
     pt10,
   ];
