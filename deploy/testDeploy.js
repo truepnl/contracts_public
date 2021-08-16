@@ -46,15 +46,27 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const day = 86400;
   const hour = day / 24;
   const min = hour / 60;
+  const pt20 = (20 * 1e18).toString();
   const pt10 = (10 * 1e18).toString();
+
+  // Interface:
+  // address _paymentToken,
+  // address _poolToken,
+  // uint256 _startDate,
+  // uint256 _closeDate,
+  // uint256 _initialUnlock,
+  // uint256 _unlockPeriod,
+  // uint256 _totalUnlock,
+  // uint256 _cliff,
+  // uint256 _unlockPerPeriod
 
   const args = [
     USDT.address,
     poolToken.address,
     Math.round(Date.now() / 1000),
     Math.round(Date.now() / 1000) + day,
-    pt10,
-    10 * min,
+    pt20,
+    5 * min,
     min * 100,
     0,
     pt10,
@@ -70,6 +82,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   await sleep(10000);
+
   await tryVerify(
     vestedPool.address,
     args,
@@ -82,7 +95,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const pool = await ethers.getContract("VestedPool", deployer);
 
   await usdt.transfer(testerAcc, BigInt(1e18 * 1000));
-  await token.transfer(vestedPool.address, BigInt(1e18 * 50000));
+  await token.transfer(vestedPool.address, BigInt(1e18 * 1500000));
   await token.transfer(
     "0x13E02ff1d524A0C2f1A2fF86B4B654A3FAcD7644",
     BigInt(1e18 * 50000)
