@@ -61,7 +61,7 @@ abstract contract Pool is Ownable {
         uint256 amount = allocations[msg.sender].amount;
 
         uint256 paymentToReceive = (amount * rate) / _divider;
-        require(paymentToken.allowance(msg.sender, address(this)) >= paymentToReceive, "Payment token wasn't approved");
+        require(paymentToken.allowance(msg.sender, address(this)) >= paymentToReceive, "Payment token wasnt approved");
 
         allocations[msg.sender].bought = true;
 
