@@ -111,11 +111,11 @@ abstract contract Pool is Ownable {
 
     function batchSetAllocations(
         address[] calldata _recepients,
-        uint256 _amount,
+        uint256[] calldata _amounts,
         uint256 _rate
     ) external onlyOwner {
         for (uint32 i = 0; i < _recepients.length; i++) {
-            allocations[_recepients[i]].amount = _amount;
+            allocations[_recepients[i]].amount = _amounts[i];
             allocations[_recepients[i]].claimed = 0;
             allocations[_recepients[i]].rate = _rate;
             allocations[_recepients[i]].bought = false;
