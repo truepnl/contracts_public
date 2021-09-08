@@ -2,7 +2,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  const testerAcc = "0x5906aB74bb1757eAcB94722249cFe1cE3f003E84";
+  const testerAcc = "0x70f53670045EC5B0C8E90EbB7006F8C4E578d8CC";
 
   const tryVerify = async (contract, args, file) => {
     try {
@@ -64,9 +64,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     USDT.address,
     poolToken.address,
     Math.round(Date.now() / 1000),
-    Math.round(Date.now() / 1000) + day,
-    pt20,
-    5 * min,
+    Math.round(Date.now() / 1000) + 5 * min,
+    0,
+    6 * min,
     min * 100,
     0,
     pt10,
@@ -100,6 +100,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     "0x13E02ff1d524A0C2f1A2fF86B4B654A3FAcD7644",
     BigInt(1e18 * 50000)
   );
+
   await usdt.approve(vestedPool.address, BigInt(1e18 * 400000));
 
   await pool.setAllocation(testerAcc, BigInt(1e18 * 34090), 11);
