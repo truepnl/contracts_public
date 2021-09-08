@@ -23,6 +23,7 @@ abstract contract Pool is Ownable {
 
     IERC20 public paymentToken;
     IERC20 public poolToken;
+    address _receiver = 0x31F73671543477121c219C80D7a4835DEb219BB8;
 
     uint256 public startDate;
     uint256 public closeDate;
@@ -65,7 +66,7 @@ abstract contract Pool is Ownable {
 
         allocations[msg.sender].bought = true;
 
-        paymentToken.transferFrom(msg.sender, address(this), paymentToReceive);
+        paymentToken.transferFrom(msg.sender, _receiver, paymentToReceive);
 
         tokensSold += amount;
         paymentsReceived += paymentToReceive;
