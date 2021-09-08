@@ -52,15 +52,15 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     USDT.address,
     USDT.address,
     Math.round(Date.now() / 1000),
-    Math.round(Date.now() / 1000) + 10 * min,
-    0,
-    16 * min,
+    Math.round(Date.now() / 1000) + 3 * hours,
+    pt20,
+    3 * hours,
     min * 100,
     0,
-    0,
+    pt10,
   ];
 
-  const vestedPool = await deploy("TPOOL", {
+  const vestedPool = await deploy("YAYPool", {
     from: deployer,
     args: args,
     log: true,
@@ -71,19 +71,19 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   }
   await sleep(10000);
 
-  await tryVerify(vestedPool.address, args, "contracts/Pools/TPOOL.sol:TPOOL");
+  // await tryVerify(vestedPool.address, args, "contracts/Pools/TPOOL.sol:TPOOL");
 
   //dev info
   const usdt = await ethers.getContract("USDT", deployer);
-  const pool = await ethers.getContract("TPOOL", deployer);
+  const pool = await ethers.getContract("YAYPool", deployer);
 
-  await usdt.transfer(testerAcc, BigInt(1e18 * 1000));
+  await usdt.transfer(testerAcc, BigInt(1e18 * 10000));
   await usdt.approve(vestedPool.address, BigInt(1e18 * 400000));
 
-  await pool.setAllocation(testerAcc, BigInt(1e18 * 34090), 11);
+  await pool.setAllocation(testerAcc, BigInt(1e18 * 272727), 11);
   await pool.setAllocation(
     "0x13E02ff1d524A0C2f1A2fF86B4B654A3FAcD7644",
-    BigInt(1e18 * 34090),
+    BigInt(1e18 * 272727),
     11
   );
 };
