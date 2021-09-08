@@ -17,22 +17,26 @@ contract DepositPool is Ownable {
     uint256 public paymentsReceived;
     uint256 private _divider = 10000;
     uint256 public minDeposit = 50 * 10e18;
+    uint256 goal;
 
     event Deposit(address participant, uint256 amount, uint256 newDepositTotal);
 
     constructor(
         address _paymentToken,
         uint256 _startDate,
-        uint256 _closeDate
+        uint256 _closeDate,
+        uint256 _goal
     ) {
         require(_startDate < _closeDate, "Wrong dates");
 
         paymentToken = IERC20(_paymentToken);
         startDate = _startDate;
         closeDate = _closeDate;
+        goal = _goal;
     }
 
     function saleActive() public view returns (bool) {
+        if (paymentsReceived >= goal) return false;
         return (block.timestamp >= startDate && block.timestamp <= closeDate);
     }
 
