@@ -45,6 +45,12 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log: true,
   });
 
+  await tryVerify(
+    depositPool.address,
+    args,
+    "contracts/Pools/DepositPool.sol:DepositPool"
+  );
+
   function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
