@@ -36,6 +36,7 @@ module.exports = {
     ropsten: {
       url: `https://ropsten.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [DEPLOYER_PRIVATE_KEY],
+      gasPrice: 200000000000,
     },
     bsctestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
