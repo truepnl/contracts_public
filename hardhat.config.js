@@ -36,20 +36,20 @@ module.exports = {
     ropsten: {
       url: `https://ropsten.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [DEPLOYER_PRIVATE_KEY],
-      gasPrice: 200000000000,
-    },
-    bsctestnet: {
-      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
-      chainId: 97,
       gasPrice: 20000000000,
-      accounts: { mnemonic: BSC_MNEMONIC },
     },
-    bscmainnet: {
-      url: "https://bsc-dataseed.binance.org/",
-      chainId: 56,
-      gasPrice: 20000000000,
-      accounts: { mnemonic: BSC_MNEMONIC },
-    },
+    // bsctestnet: {
+    //   url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+    //   chainId: 97,
+    //   gasPrice: 20000000000,
+    //   accounts: { mnemonic: BSC_MNEMONIC },
+    // },
+    // bscmainnet: {
+    //   url: "https://bsc-dataseed.binance.org/",
+    //   chainId: 56,
+    //   gasPrice: 20000000000,
+    //   accounts: { mnemonic: BSC_MNEMONIC },
+    // },
   },
   defaultNetwork: "ganache",
   namedAccounts: {
