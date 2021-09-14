@@ -7,6 +7,7 @@ contract VestedPool is Pool {
     uint256 public unlockPeriod;
     uint256 public totalUnlock;
     uint256 public cliff;
+    uint256 public afterPurchaseCliff;
 
     uint256 public initialUnlock;
     uint256 public unlockPerPeriod;
@@ -24,6 +25,7 @@ contract VestedPool is Pool {
         uint256 _unlockPeriod,
         uint256 _totalUnlock,
         uint256 _cliff,
+        uint256 _afterPurchaseCliff,
         uint256 _unlockPerPeriod
     ) Pool(_paymentToken, _poolToken, _startDate, _closeDate) {
         poolType = PoolTypes.Vested;
@@ -32,6 +34,7 @@ contract VestedPool is Pool {
         unlockPeriod = _unlockPeriod;
         totalUnlock = _totalUnlock;
         cliff = _cliff;
+        afterPurchaseCliff = _afterPurchaseCliff;
         unlockPerPeriod = _unlockPerPeriod;
     }
 
@@ -40,7 +43,7 @@ contract VestedPool is Pool {
     }
 
     function getClaimableTokens(address user) public view returns (uint256) {
-        if (block.timestamp < startDate + cliff || !hasBought(user)) return 0;
+        if (block.timestamp < (startDate + afterPurchaseCliff) || !hasBought(user)) return 0;
 
         uint256 tokensToClaimAfterPurchase = (allocations[user].amount * initialUnlock) / ONE_HUNDRED_PERCENT;
         uint256 tokenstToClaimPerPeriod = (allocations[user].amount * unlockPerPeriod) / ONE_HUNDRED_PERCENT;
@@ -48,21 +51,27 @@ contract VestedPool is Pool {
         uint256 amount = allocations[user].amount;
         if (block.timestamp >= totalUnlock + startDate + cliff || claimed + tokenstToClaimPerPeriod > amount) return amount - claimed;
 
-        uint256 claimable = ((block.timestamp - startDate - cliff) / unlockPeriod) * tokenstToClaimPerPeriod + tokensToClaimAfterPurchase - claimed;
+        if (claimed == 0) {
+            uint256 claimable = tokensToClaimAfterPurchase;
+            return claimable;
+        } else {
+            if (block.timestamp < startDate + afterPurchaseCliff + cliff) return 0;
 
-        return claimable;
+            uint256 claimable = ((block.timestamp - startDate - afterPurchaseCliff - cliff) / unlockPeriod) * tokenstToClaimPerPeriod + tokensToClaimAfterPurchase - claimed;
+            return claimable;
+        }
     }
 
     function buy() public override(Pool) {
         super.buy();
 
-        uint256 tokensToClaimAfterPurchase = (allocations[msg.sender].amount * initialUnlock) / ONE_HUNDRED_PERCENT;
-        allocations[msg.sender].claimed = tokensToClaimAfterPurchase;
-        allocations[msg.sender].claimedAt = block.timestamp;
-
-        poolToken.transfer(msg.sender, tokensToClaimAfterPurchase);
-
-        emit Claimed(msg.sender, tokensToClaimAfterPurchase);
+        if (afterPurchaseCliff == 0) {
+            uint256 tokensToClaimAfterPurchase = (allocations[msg.sender].amount * initialUnlock) / ONE_HUNDRED_PERCENT;
+            allocations[msg.sender].claimed = tokensToClaimAfterPurchase;
+            allocations[msg.sender].claimedAt = block.timestamp;
+            poolToken.transfer(msg.sender, tokensToClaimAfterPurchase);
+            emit Claimed(msg.sender, tokensToClaimAfterPurchase);
+        }
     }
 
     function claim() public {
@@ -82,9 +91,13 @@ contract VestedPool is Pool {
 
     function nextClaimingAt(address wallet) public view returns (uint256) {
         if (canClaim(wallet) || !hasBought(wallet)) return 0;
-        uint256 periodsPassed = (allocations[wallet].claimedAt - startDate) / unlockPeriod;
-
-        return startDate + unlockPeriod * (periodsPassed + 1);
+        if (allocations[wallet].claimed == 0) {
+            return startDate + afterPurchaseCliff;
+        } else {
+            if (allocations[wallet].claimedAt - startDate < cliff) return startDate + afterPurchaseCliff + cliff;
+            uint256 periodsPassed = (allocations[wallet].claimedAt - startDate - cliff) / unlockPeriod;
+            return startDate + afterPurchaseCliff + cliff + unlockPeriod * (periodsPassed + 1);
+        }
     }
 
     function remained(address wallet) public view returns (uint256) {
