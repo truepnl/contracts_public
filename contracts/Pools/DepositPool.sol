@@ -16,7 +16,7 @@ contract DepositPool is Ownable {
     bool public whitelistEnabled = true;
     uint256 public paymentsReceived;
     uint256 private _divider = 10000;
-    uint256 public minDeposit = 50 * 10e18;
+    uint256 public minDeposit = 50 * 1e18;
     uint256 public goal;
 
     event Deposit(address participant, uint256 amount, uint256 newDepositTotal);
