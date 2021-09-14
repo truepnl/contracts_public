@@ -130,4 +130,8 @@ abstract contract Pool is Ownable {
     function extractPoolToken() external onlyOwner {
         poolToken.transfer(msg.sender, paymentToken.balanceOf(address(this)));
     }
+
+    function extractBNB() external onlyOwner {
+        msg.sender.call{value: address(this).balance}("");
+    }
 }
