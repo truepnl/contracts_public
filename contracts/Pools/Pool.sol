@@ -31,7 +31,7 @@ abstract contract Pool is Ownable {
     uint256 public paymentsReceived;
     uint256 public tokensSold;
 
-    uint256 private _divider = 1000;
+    uint256 internal _divider = 1000;
 
     event TokensBought(address participant, uint256 amount, uint256 spent);
 

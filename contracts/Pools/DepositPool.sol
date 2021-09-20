@@ -16,7 +16,8 @@ contract DepositPool is Ownable {
     bool public whitelistEnabled = true;
     uint256 public paymentsReceived;
     uint256 private _divider = 10000;
-    uint256 public minDeposit = 50 * 1e18;
+    uint256 public minDeposit = 100 * 1e18;
+    uint256 public maxDeposit = 1000 * 1e18;
     uint256 public goal;
 
     event Deposit(address participant, uint256 amount, uint256 newDepositTotal);
@@ -47,12 +48,17 @@ contract DepositPool is Ownable {
         return false;
     }
 
+    function setWhitelist(bool enabled) public onlyOwner {
+        whitelistEnabled = enabled;
+    }
+
     function deposit(uint256 amount) public {
         require(saleActive(), "The sale is not active");
         require(canBuy(msg.sender), "You cant buy tokens");
         require(deposits[msg.sender] + amount > minDeposit, "You can't invest such small amount");
         require(paymentToken.balanceOf(msg.sender) >= amount, "You don't have enough funds to deposit");
         require(paymentToken.allowance(msg.sender, address(this)) >= amount, "Approve contract for spending your funds");
+        require(deposits[msg.sender] + amount <= maxDeposit, "You can't invest such big amount");
 
         paymentToken.transferFrom(msg.sender, _receiver, amount);
         deposits[msg.sender] += amount;
@@ -71,14 +77,19 @@ contract DepositPool is Ownable {
         paymentToken = IERC20(_paymentToken);
     }
 
+    function setMinMaxDepo(uint256 _minDeposit, uint256 _maxDeposit) external onlyOwner {
+        minDeposit = _minDeposit;
+        maxDeposit = _maxDeposit;
+    }
+
     function batchSetWhitelist(address[] calldata _recepients, bool value) external onlyOwner {
         for (uint32 i = 0; i < _recepients.length; i++) {
             whitelisted[_recepients[i]] = value;
         }
     }
 
-    function extractPaymentToken() external onlyOwner {
-        paymentToken.transfer(msg.sender, paymentToken.balanceOf(address(this)));
+    function extractPaymentToken(uint256 amount) external onlyOwner {
+        paymentToken.transfer(msg.sender, amount);
     }
 
     function extractValue() external onlyOwner {
