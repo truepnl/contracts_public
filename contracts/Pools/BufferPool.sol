@@ -39,15 +39,16 @@ contract BufferPool is Pool {
     }
 
     function getClaimableTokens(address user) public view returns (uint256) {
-        if (block.timestamp < startDate + cliff || !hasBought(user)) return 0;
-
         uint256 tokensToClaimAfterPurchase = (allocations[user].amount * initialUnlock) / ONE_HUNDRED_PERCENT;
         uint256 tokenstToClaimPerPeriod = (allocations[user].amount * unlockPerPeriod) / ONE_HUNDRED_PERCENT;
         uint256 claimed = allocations[user].claimed;
         uint256 amount = allocations[user].amount;
-        if (block.timestamp >= totalUnlock + startDate + cliff || claimed + tokenstToClaimPerPeriod > amount) return amount - claimed;
 
-        uint256 claimable = ((block.timestamp - startDate - cliff) / unlockPeriod) * tokenstToClaimPerPeriod + tokensToClaimAfterPurchase - claimed;
+        if (startDate > block.timestamp) return 0;
+        if (block.timestamp >= totalUnlock + startDate + cliff || claimed + tokenstToClaimPerPeriod > amount) return amount - claimed;
+        if (startDate + cliff > block.timestamp) return tokensToClaimAfterPurchase - claimed;
+
+        uint256 claimable = (((block.timestamp - startDate - cliff) / unlockPeriod) + 1) * (tokenstToClaimPerPeriod) + tokensToClaimAfterPurchase - claimed;
 
         return claimable;
     }
@@ -97,9 +98,11 @@ contract BufferPool is Pool {
 
     function nextClaimingAt(address wallet) public view returns (uint256) {
         if (canClaim(wallet) || !hasBought(wallet)) return 0;
-        uint256 periodsPassed = (allocations[wallet].claimedAt - startDate) / unlockPeriod;
+        if (startDate > block.timestamp) return startDate;
+        if (startDate + cliff > block.timestamp) return startDate + cliff;
+        uint256 periodsPassed = (block.timestamp - startDate - cliff) / unlockPeriod;
 
-        return startDate + unlockPeriod * (periodsPassed + 1);
+        return startDate + unlockPeriod * (periodsPassed + 1) + cliff;
     }
 
     function remained(address wallet) public view returns (uint256) {
