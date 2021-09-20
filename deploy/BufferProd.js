@@ -17,7 +17,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   const day = 86400;
   const pt30 = (30 * 1e18).toString();
-  const pt8 = (8.333333333333333 * 1e18).toString();
+  const pt8 = (8.75 * 1e18).toString();
 
   // Interface:
   // address _paymentToken,
@@ -38,7 +38,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     pt30,
     7 * day,
     70 * day,
-    7 * day,
+    15 * day,
     pt8,
   ];
 
@@ -56,7 +56,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   await tryVerify(
     vestedPool.address,
     args,
-    "contracts/BufferPool.sol:BufferPool"
+    "contracts/Pools/BufferPool.sol:BufferPool"
   );
 };
 
