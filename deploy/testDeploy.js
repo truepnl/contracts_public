@@ -49,7 +49,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const pt20 = (20 * 1e18).toString();
   const pt10 = (10 * 1e18).toString();
 
-  // Interface:
   // address _paymentToken,
   // address _poolToken,
   // uint256 _startDate,
@@ -58,6 +57,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   // uint256 _unlockPeriod,
   // uint256 _totalUnlock,
   // uint256 _cliff,
+  // uint256 _afterPurchaseCliff,
   // uint256 _unlockPerPeriod
 
   const args = [
@@ -68,6 +68,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     0,
     6 * min,
     min * 100,
+    0,
     0,
     pt10,
   ];
