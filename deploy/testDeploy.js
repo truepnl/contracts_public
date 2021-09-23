@@ -65,7 +65,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     poolToken.address,
     Math.round(Date.now() / 1000),
     Math.round(Date.now() / 1000) + 5 * min,
-    0,
+    pt10,
     6 * min,
     min * 100,
     0,
