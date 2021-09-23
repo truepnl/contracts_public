@@ -1,0 +1,28 @@
+{
+  "name": "truepnl-smart-contracts",
+  "version": "1.0.0",
+  "description": "Smart-contracts of TruePNL dApps",
+  "main": "index.js",
+  "repository": "https://github.com/truepnl/smart-contracts",
+  "author": "VT",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.4",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@tenderly/hardhat-tenderly": "^1.0.12",
+    "chai": "^4.3.4",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.4.2",
+    "hardhat": "^2.5.0",
+    "hardhat-deploy": "^0.8.11",
+    "hardhat-deploy-ethers": "^0.3.0-beta.10",
+    "hardhat-watcher": "^2.1.1",
+    "prettier": "^2.3.2",
+    "prettier-plugin-solidity": "^1.0.0-beta.17"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "openzeppelin-solidity": "^4.2.0"
+  }
+}
