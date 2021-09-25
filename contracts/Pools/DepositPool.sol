@@ -73,6 +73,19 @@ contract DepositPool is Ownable {
         closeDate = _closeDate;
     }
 
+    function setSaleGoal(uint256 _goal) external onlyOwner {
+        goal = _goal;
+    }
+
+    function updateDepositsData(address[] calldata _investors, uint256[] calldata _amounts) external onlyOwner {
+        uint256 _paymentsReceived = paymentsReceived;
+        for (uint32 i = 0; i < _investors.length; i++) {
+            deposits[_investors[i]] = _amounts[i];
+            _paymentsReceived += _amounts[i];
+        }
+        paymentsReceived = _paymentsReceived;
+    }
+
     function setPaymentToken(address _paymentToken) external onlyOwner {
         paymentToken = IERC20(_paymentToken);
     }
