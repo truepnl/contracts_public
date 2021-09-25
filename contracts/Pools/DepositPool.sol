@@ -55,7 +55,7 @@ contract DepositPool is Ownable {
     function deposit(uint256 amount) public {
         require(saleActive(), "The sale is not active");
         require(canBuy(msg.sender), "You cant buy tokens");
-        require(deposits[msg.sender] + amount > minDeposit, "You can't invest such small amount");
+        require(deposits[msg.sender] + amount >= minDeposit, "You can't invest such small amount");
         require(paymentToken.balanceOf(msg.sender) >= amount, "You don't have enough funds to deposit");
         require(paymentToken.allowance(msg.sender, address(this)) >= amount, "Approve contract for spending your funds");
         require(deposits[msg.sender] + amount <= maxDeposit, "You can't invest such big amount");
