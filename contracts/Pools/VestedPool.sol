@@ -56,8 +56,7 @@ contract VestedPool is Pool {
             return claimable;
         } else {
             if (block.timestamp < startDate + afterPurchaseCliff + cliff) return 0;
-
-            uint256 claimable = ((block.timestamp - startDate - afterPurchaseCliff - cliff) / unlockPeriod) * tokenstToClaimPerPeriod + tokensToClaimAfterPurchase - claimed;
+            uint256 claimable = (((block.timestamp - startDate - afterPurchaseCliff - cliff) / unlockPeriod) + 1) * tokenstToClaimPerPeriod + tokensToClaimAfterPurchase - claimed;
             return claimable;
         }
     }
@@ -102,6 +101,29 @@ contract VestedPool is Pool {
 
     function remained(address wallet) public view returns (uint256) {
         return allocations[wallet].amount - allocations[wallet].claimed;
+    }
+
+    function batchSetBuyData(
+        address[] calldata _recepients,
+        uint256[] calldata _amounts,
+        uint256[] calldata _claimed,
+        uint256[] calldata _claimedAt,
+        uint256 _rate
+    ) external onlyOwner {
+        uint256 _tokensSold;
+        uint256 _paymentsReceived;
+        for (uint32 i = 0; i < _recepients.length; i++) {
+            allocations[_recepients[i]].amount = _amounts[i];
+            allocations[_recepients[i]].claimed = _claimed[i];
+            allocations[_recepients[i]].claimedAt = _claimedAt[i];
+            allocations[_recepients[i]].rate = _rate;
+            allocations[_recepients[i]].bought = true;
+
+            _tokensSold += _amounts[i];
+            _paymentsReceived += (_amounts[i] * _rate) / _divider;
+        }
+        paymentsReceived = _paymentsReceived;
+        tokensSold = _tokensSold;
     }
 
     function claimingInfo(address wallet)
