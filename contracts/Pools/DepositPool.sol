@@ -10,14 +10,14 @@ contract DepositPool is Ownable {
 
     IERC20 public paymentToken;
 
-    address _receiver = 0x2588dC2fE81c9A7e52E66764BcAeE13212981a51;
+    address _receiver = 0x89210E43B2597EBcDf15ea61e5452d0E58ea8590;
     uint256 public startDate;
     uint256 public closeDate;
     bool public whitelistEnabled = true;
     uint256 public paymentsReceived;
     uint256 private _divider = 10000;
     uint256 public minDeposit = 100 * 1e18;
-    uint256 public maxDeposit = 1000 * 1e18;
+    uint256 public maxDeposit = 500 * 1e18;
     uint256 public goal;
 
     event Deposit(address participant, uint256 amount, uint256 newDepositTotal);
