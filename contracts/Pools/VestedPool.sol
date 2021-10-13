@@ -56,7 +56,7 @@ contract VestedPool is Pool {
             return claimable;
         } else {
             if (block.timestamp < startDate + afterPurchaseCliff + cliff) return 0;
-            uint256 claimable = (((block.timestamp - startDate - afterPurchaseCliff - cliff) / unlockPeriod) + 1) * tokenstToClaimPerPeriod + tokensToClaimAfterPurchase - claimed;
+            uint256 claimable = (((block.timestamp - startDate - afterPurchaseCliff - cliff) / unlockPeriod)) * tokenstToClaimPerPeriod + tokensToClaimAfterPurchase - claimed;
             return claimable;
         }
     }
@@ -93,8 +93,8 @@ contract VestedPool is Pool {
         if (allocations[wallet].claimed == 0) {
             return startDate + afterPurchaseCliff;
         } else {
-            if (allocations[wallet].claimedAt - startDate < cliff) return startDate + afterPurchaseCliff + cliff;
-            uint256 periodsPassed = (allocations[wallet].claimedAt - startDate - cliff) / unlockPeriod;
+            if (block.timestamp - startDate < cliff) return startDate + afterPurchaseCliff + cliff;
+            uint256 periodsPassed = (block.timestamp - startDate - cliff - afterPurchaseCliff) / unlockPeriod;
             return startDate + afterPurchaseCliff + cliff + unlockPeriod * (periodsPassed + 1);
         }
     }
