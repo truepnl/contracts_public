@@ -23,12 +23,13 @@ abstract contract Pool is Ownable {
 
     IERC20 public paymentToken;
     IERC20 public poolToken;
-    address _receiver = 0x31F73671543477121c219C80D7a4835DEb219BB8;
+    address _receiver = 0x2983cF6AEc2165BBd314252fE2Ab2aC1671e592D;
 
     uint256 public startDate;
     uint256 public closeDate;
 
     uint256 public paymentsReceived;
+    uint256 public goal;
     uint256 public tokensSold;
 
     uint256 internal _divider = 1000;
@@ -57,11 +58,13 @@ abstract contract Pool is Ownable {
         require(saleActive(), "The sale is not active");
         require(canBuy(msg.sender), "You cant buy tokens");
         require(!hasBought(msg.sender), "Youve already bought tokens");
+        require(paymentsReceived <= goal, "Sale goal reached");
 
         uint256 rate = allocations[msg.sender].rate;
         uint256 amount = allocations[msg.sender].amount;
 
         uint256 paymentToReceive = (amount * rate) / _divider;
+
         require(paymentToken.allowance(msg.sender, address(this)) >= paymentToReceive, "Payment token wasnt approved");
 
         allocations[msg.sender].bought = true;
@@ -78,14 +81,20 @@ abstract contract Pool is Ownable {
         address _paymentToken,
         address _poolToken,
         uint256 _startDate,
-        uint256 _closeDate
+        uint256 _closeDate,
+        uint256 _goal
     ) {
         require(_startDate < _closeDate, "Wrong dates");
 
+        goal = _goal;
         paymentToken = IERC20(_paymentToken);
         poolToken = IERC20(_poolToken);
         startDate = _startDate;
         closeDate = _closeDate;
+    }
+
+    function setGoal(uint256 _goal) external onlyOwner {
+        goal = _goal;
     }
 
     function setSaleDates(uint256 _startDate, uint256 _closeDate) external onlyOwner {

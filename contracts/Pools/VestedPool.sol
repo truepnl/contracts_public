@@ -21,13 +21,14 @@ contract VestedPool is Pool {
         address _poolToken,
         uint256 _startDate,
         uint256 _closeDate,
+        uint256 _goal,
         uint256 _initialUnlock,
         uint256 _unlockPeriod,
         uint256 _totalUnlock,
         uint256 _cliff,
         uint256 _afterPurchaseCliff,
         uint256 _unlockPerPeriod
-    ) Pool(_paymentToken, _poolToken, _startDate, _closeDate) {
+    ) Pool(_paymentToken, _poolToken, _startDate, _closeDate, _goal) {
         poolType = PoolTypes.Vested;
 
         initialUnlock = _initialUnlock;
