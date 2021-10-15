@@ -12,7 +12,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const min = hour / 60;
   const pt20 = (20 * 1e18).toString();
   const pt40 = (40 * 1e18).toString();
-  const goal = (50000 * 1e18).toString();
+  const goal = BigInt(50000 * 1e18).toString();
 
   const args = [
     USDT, // address _paymentToken,
@@ -22,7 +22,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     goal, //25k
     pt20, // uint256 _initialUnlock,
     30 * day, //uint256 _unlockPeriod,
-    5998500, // uint256 _totalUnlock,
+    5998502, // uint256 _totalUnlock,
     7 * day, // uint256 _cliff,
     209700, // uint256 _afterPurchaseCliff,
     pt40, // uint256 _unlockPerPeriod

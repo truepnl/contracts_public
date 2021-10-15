@@ -2,6 +2,19 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
+  const tryVerify = async (contract, args, file) => {
+    try {
+      await run("verify:verify", {
+        contract: file,
+        address: contract,
+        constructorArguments: args,
+      });
+    } catch (e) {
+      console.log(e);
+      console.log(`${e.name} - ${e.message}`);
+    }
+  };
+
   const day = 86400;
   const hour = day / 24;
 
@@ -9,9 +22,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   const args = [
     USDT,
-    1631808000,
-    1632067200,
-    BigInt(50000 * 10 ** 18).toString(),
+    1632402001,
+    1632747600,
+    BigInt(60000 * 10 ** 18).toString(),
   ];
 
   const depositPool = await deploy("DepositPool", {
@@ -19,6 +32,12 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     args: args,
     log: true,
   });
+
+  await tryVerify(
+    depositPool.address,
+    args,
+    "contracts/Pools/DepositPool.sol:DepositPool"
+  );
 };
 
 module.exports.tags = ["DepositPoolProd"];
