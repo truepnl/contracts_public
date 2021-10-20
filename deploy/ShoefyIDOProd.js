@@ -9,9 +9,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   const day = 86400;
   const hour = day / 24;
-  const min = hour / 60;
-  const pt20 = (20 * 1e18).toString();
-  const pt40 = (40 * 1e18).toString();
+  const pt50 = (50 * 1e18).toString();
   const goal = BigInt(50000 * 1e18).toString();
 
   const args = [
@@ -19,13 +17,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     USDT, // address _poolToken,
     "1634216400", // 	Thu Oct 14 2021 13:00:00 GMT+0000
     "1634241600", // Thu Oct 14 2021 20:00:00 GMT+0000
-    goal, //25k
-    pt20, // uint256 _initialUnlock,
-    30 * day, //uint256 _unlockPeriod,
-    5998502, // uint256 _totalUnlock,
-    7 * day, // uint256 _cliff,
-    209700, // uint256 _afterPurchaseCliff,
-    pt40, // uint256 _unlockPerPeriod
+    goal, //50k
+    pt50, // uint256 _initialUnlock,
+    30 * day, //uint25e6 _unlockPeriod,
+    2592000, // uint256 _totalUnlock,
+    0, // uint256 _cliff,
+    432000, // uint256 _afterPurchaseCliff,
+    pt50, // uint256 _unlockPerPeriod
   ];
 
   const vestedPool = await deploy("VestedPool", {

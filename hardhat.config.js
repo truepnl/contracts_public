@@ -38,16 +38,14 @@ module.exports = {
       accounts: [DEPLOYER_PRIVATE_KEY],
       gasPrice: 26000000000,
     },
-    // bsctestnet: {
-    //   url: "https://data-seed-prebsc-1-s1.binance.org:8545",
-    //   chainId: 97,
-    //   gasPrice: 20000000000,
-    //   accounts: { mnemonic: BSC_MNEMONIC },
-    // },
+    bsctestnet: {
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+      chainId: 97,
+      accounts: { mnemonic: BSC_MNEMONIC },
+    },
     bscmainnet: {
       url: "https://bsc-dataseed.binance.org/",
       chainId: 56,
-      gasPrice: 30000000000,
       accounts: { mnemonic: BSC_MNEMONIC },
     },
   },
