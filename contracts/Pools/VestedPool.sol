@@ -94,7 +94,8 @@ contract VestedPool is Pool {
         if (allocations[wallet].claimed == 0) {
             return startDate + afterPurchaseCliff;
         } else {
-            if (block.timestamp - startDate < cliff) return startDate + afterPurchaseCliff + cliff;
+            if (block.timestamp - startDate < afterPurchaseCliff) return startDate + afterPurchaseCliff;
+            if (block.timestamp - startDate - afterPurchaseCliff < cliff) return startDate + afterPurchaseCliff + cliff + unlockPeriod;
             uint256 periodsPassed = (block.timestamp - startDate - cliff - afterPurchaseCliff) / unlockPeriod;
             return startDate + afterPurchaseCliff + cliff + unlockPeriod * (periodsPassed + 1);
         }

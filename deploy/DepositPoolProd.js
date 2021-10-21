@@ -22,9 +22,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   const args = [
     USDT,
-    1632402001,
-    1632747600,
-    BigInt(60000 * 10 ** 18).toString(),
+    1634677200,
+    1635627600,
+    BigInt(62500 * 10 ** 18).toString(),
   ];
 
   const depositPool = await deploy("DepositPool", {

@@ -48,6 +48,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const min = hour / 60;
   const pt20 = (20 * 1e18).toString();
   const pt10 = (10 * 1e18).toString();
+  const goal = BigInt(50000 * 1e18).toString();
 
   // address _paymentToken,
   // address _poolToken,
@@ -65,6 +66,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     poolToken.address,
     Math.round(Date.now() / 1000),
     Math.round(Date.now() / 1000) + 5 * min,
+    goal,
     pt10,
     6 * min,
     min * 100,

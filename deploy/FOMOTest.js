@@ -18,9 +18,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const poolToken = await deploy("dummyPoolToken", {
     from: deployer,
     args: tokenArgs,
-    log: true,
   });
-  await tryVerify(poolToken.address, tokenArgs);
+
+  await tryVerify(
+    poolToken.address,
+    tokenArgs,
+    "contracts/utils/dummyPoolToken.sol:dummyPoolToken"
+  );
 
   await tryVerify(
     USDT.address,
@@ -33,12 +37,14 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const min = hour / 60;
   const pt20 = (20 * 1e18).toString();
   const pt10 = (10 * 1e18).toString();
+  const goal = BigInt(10000 * 1e18).toString();
 
   const args = [
     USDT.address, // address _paymentToken,
     poolToken.address, // address _poolToken,
     Math.round(Date.now() / 1000), // uint256 _startDate,
     Math.round(Date.now() / 1000) + 10 * 8 * min, // uint256 _closeDate,
+    goal,
     pt20, // uint256 _initialUnlock,
     5 * min, //uint256 _unlockPeriod,
     min * 10 * 8, // uint256 _totalUnlock,
