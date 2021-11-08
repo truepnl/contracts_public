@@ -10,8 +10,6 @@ contract DepositPoolV3 is Ownable {
     mapping(address => uint256) public deposits;
     mapping(address => uint256) public maxDeposit;
 
-    mapping(address => bool) public whitelisted;
-
     address manager = 0xe066FcA44c978Fe4A5F221dfda264dDF41d3E62d;
 
     IERC20 public paymentToken;
@@ -19,7 +17,6 @@ contract DepositPoolV3 is Ownable {
     address _receiver = 0x6FeF0AA142C8aA4A6bf6A9C14217b24DcA156F08;
     uint256 public startDate;
     uint256 public closeDate;
-    bool public whitelistEnabled = true;
     uint256 public paymentsReceived;
     uint256 private _divider = 10000;
     uint256 public minDeposit = 100 * 1e18;
@@ -47,17 +44,6 @@ contract DepositPoolV3 is Ownable {
         return (block.timestamp >= startDate && block.timestamp <= closeDate);
     }
 
-    function canBuy(address wallet) public view returns (bool) {
-        if (!saleActive()) return false;
-        if (!whitelistEnabled) return true;
-        if (whitelisted[wallet]) return true;
-        return false;
-    }
-
-    function setWhitelist(bool enabled) public onlyOwner {
-        whitelistEnabled = enabled;
-    }
-
     function verifySig(
         uint256 amount,
         uint256 nonce,
@@ -69,12 +55,10 @@ contract DepositPoolV3 is Ownable {
 
     function deposit(uint256 amount, bytes memory signature) public {
         require(saleActive(), "The sale is not active");
-        require(canBuy(msg.sender), "You cant buy tokens");
-        require(deposits[msg.sender] + amount >= minDeposit, "You can't invest such small amount");
-        require(paymentToken.balanceOf(msg.sender) >= amount, "You don't have enough funds to deposit");
+        require(deposits[msg.sender] + amount >= minDeposit, "You cant invest such small amount");
+        require(paymentToken.balanceOf(msg.sender) >= amount, "You dont have enough funds to deposit");
         require(paymentToken.allowance(msg.sender, address(this)) >= amount, "Approve contract for spending your funds");
-        require(deposits[msg.sender] + amount <= maxDeposit[msg.sender], "You can't invest such big amount");
-
+        require(deposits[msg.sender] + amount <= maxDeposit[msg.sender], "You cant invest such big amount");
         require(verifySig(amount, nonces[msg.sender], msg.sender, signature), "Off-chain error, probably KYC unconfirmed.");
 
         paymentToken.transferFrom(msg.sender, _receiver, amount);
@@ -110,17 +94,6 @@ contract DepositPoolV3 is Ownable {
 
     function setMinDepo(uint256 _minDeposit) external onlyOwner {
         minDeposit = _minDeposit;
-    }
-
-    function batchSetWhitelist(
-        address[] calldata _recepients,
-        uint256[] calldata _maxDeposit,
-        bool value
-    ) external onlyOwner {
-        for (uint32 i = 0; i < _recepients.length; i++) {
-            maxDeposit[_recepients[i]] = _maxDeposit[i];
-            whitelisted[_recepients[i]] = value;
-        }
     }
 
     function extractPaymentToken(uint256 amount) external onlyOwner {

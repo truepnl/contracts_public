@@ -35,7 +35,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const pool = await ethers.getContract("DepositPoolV3", deployer);
   await usdt.transfer(testerAcc, BigInt(1e18 * 10000));
   await usdt.approve(depositPool.address, BigInt(1e18 * 400000));
-  await pool.batchSetWhitelist([testerAcc], [BigInt(1e18 * 2500)], true);
 
   //signature info
   // https://docs.ethers.io/v5/api/signer/#Signer-signMessage - docs
