@@ -34,8 +34,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const day = 86400;
   const args = [
     USDT.address,
-    Math.floor(Date.now() / 1000),
-    Math.floor(Date.now() / 1000) + day,
+    Math.floor(Date.now() / 1000) - day,
+    Math.floor(Date.now() / 1000) - day + 1,
     BigInt(50000 * 10 ** 18).toString(),
   ];
 

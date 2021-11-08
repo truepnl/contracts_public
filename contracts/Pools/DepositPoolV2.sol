@@ -12,7 +12,7 @@ contract DepositPoolV2 is Ownable {
 
     IERC20 public paymentToken;
 
-    address _receiver = 0x89210E43B2597EBcDf15ea61e5452d0E58ea8590;
+    address _receiver = 0x6FeF0AA142C8aA4A6bf6A9C14217b24DcA156F08;
     uint256 public startDate;
     uint256 public closeDate;
     bool public whitelistEnabled = true;
