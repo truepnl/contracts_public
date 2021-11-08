@@ -41,8 +41,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const data = [BigInt(1e18 * 200), 0, testerAcc];
 
   let mesGenerated = ethers.utils.solidityKeccak256(
-    ["bytes"],
-    [ethers.utils.solidityPack(["uint256", "uint256", "address"], data)]
+    ["uint256", "uint256", "address"],
+    data
   );
 
   const signature = await signerAcc.signMessage(
