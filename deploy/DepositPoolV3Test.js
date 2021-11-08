@@ -1,0 +1,56 @@
+const { Wallet } = require("@ethersproject/wallet");
+const { utils } = require("ethers");
+
+module.exports = async ({ getNamedAccounts, deployments }) => {
+  const { deploy } = deployments;
+  const { deployer } = await getNamedAccounts();
+  const { SIGNERPK, TESTER } = process.env;
+
+  const testerAcc = TESTER;
+  const signerAcc = new Wallet(SIGNERPK);
+
+  const tokenArgs = [BigInt(10000000000000000000000 * 10 ** 18).toString()];
+  const USDT = await deploy("USDT", {
+    from: deployer,
+    args: tokenArgs,
+    log: true,
+  });
+
+  const day = 86400;
+  const args = [
+    USDT.address,
+    Math.floor(Date.now() / 1000) - 1 * day,
+    Math.floor(Date.now() / 1000) + 1 * day,
+    BigInt(50000 * 10 ** 18).toString(),
+  ];
+
+  const depositPool = await deploy("DepositPoolV3", {
+    from: deployer,
+    args: args,
+    log: true,
+  });
+
+  //dev info
+  const usdt = await ethers.getContract("USDT", deployer);
+  const pool = await ethers.getContract("DepositPoolV3", deployer);
+  await usdt.transfer(deployer, BigInt(1e18 * 10000));
+  await usdt.approve(depositPool.address, BigInt(1e18 * 400000));
+  await pool.batchSetWhitelist([deployer], [BigInt(1e18 * 2500)], true);
+
+  //signature info
+  // https://docs.ethers.io/v5/api/signer/#Signer-signMessage - docs
+  const data = [BigInt(1e18 * 200), 0, deployer];
+
+  let mesGenerated = ethers.utils.solidityKeccak256(
+    ["bytes"],
+    [ethers.utils.solidityPack(["uint256", "uint256", "address"], data)]
+  );
+
+  const signature = await signerAcc.signMessage(
+    ethers.utils.arrayify(mesGenerated)
+  );
+
+  await pool.deposit(BigInt(1e18 * 200), signature);
+};
+
+module.exports.tags = ["DepositPoolV3Test"];
