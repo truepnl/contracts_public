@@ -33,13 +33,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   //dev info
   const usdt = await ethers.getContract("USDT", deployer);
   const pool = await ethers.getContract("DepositPoolV3", deployer);
-  await usdt.transfer(deployer, BigInt(1e18 * 10000));
+  await usdt.transfer(testerAcc, BigInt(1e18 * 10000));
   await usdt.approve(depositPool.address, BigInt(1e18 * 400000));
-  await pool.batchSetWhitelist([deployer], [BigInt(1e18 * 2500)], true);
+  await pool.batchSetWhitelist([testerAcc], [BigInt(1e18 * 2500)], true);
 
   //signature info
   // https://docs.ethers.io/v5/api/signer/#Signer-signMessage - docs
-  const data = [BigInt(1e18 * 200), 0, deployer];
+  const data = [BigInt(1e18 * 200), 0, testerAcc];
 
   let mesGenerated = ethers.utils.solidityKeccak256(
     ["bytes"],
@@ -50,7 +50,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     ethers.utils.arrayify(mesGenerated)
   );
 
-  await pool.deposit(BigInt(1e18 * 200), signature);
+  console.log(`This is your signature ${signature}`);
 };
 
 module.exports.tags = ["DepositPoolV3Test"];
