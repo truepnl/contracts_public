@@ -38,10 +38,10 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   //signature info
   // https://docs.ethers.io/v5/api/signer/#Signer-signMessage - docs
-  const data = [BigInt(1e18 * 200), 0, testerAcc];
+  const data = [BigInt(1e18 * 200), 0, testerAcc, pool.address];
 
   let mesGenerated = ethers.utils.solidityKeccak256(
-    ["uint256", "uint256", "address"],
+    ["uint256", "uint256", "address", "address"],
     data
   );
 

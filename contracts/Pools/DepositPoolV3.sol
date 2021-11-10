@@ -50,7 +50,7 @@ contract DepositPoolV3 is Ownable {
         address account,
         bytes memory signature
     ) public view returns (bool) {
-        return keccak256(abi.encodePacked(amount, nonce, account)).toEthSignedMessageHash().recover(signature) == manager;
+        return keccak256(abi.encodePacked(amount, nonce, account, address(this))).toEthSignedMessageHash().recover(signature) == manager;
     }
 
     function deposit(uint256 amount, bytes memory signature) public {
