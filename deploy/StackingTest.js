@@ -20,6 +20,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   await token.transfer(stacking.address, BigInt(100000000 * 10 ** 18));
   await token.transfer(testerAcc, BigInt(5000 * 10 ** 18));
+
+  console.log(`Stacking address: ${stacking.address}`);
+  console.log(`Token address: ${token.address}`);
 };
 
 module.exports.tags = ["StackingTest"];
