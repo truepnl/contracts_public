@@ -2,6 +2,7 @@ require("@nomiclabs/hardhat-waffle");
 require("hardhat-deploy");
 require("hardhat-deploy-ethers");
 require("hardhat-watcher");
+require("hardhat-tracer");
 
 require("@nomiclabs/hardhat-etherscan");
 const dotenv = require("dotenv");
@@ -9,19 +10,6 @@ const dotenv = require("dotenv");
 dotenv.config();
 const { DEPLOYER_PRIVATE_KEY, INFURA_PROJECT_ID, ETHERSCAN_API, BSC_MNEMONIC } =
   process.env;
-
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
-
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -36,7 +24,6 @@ module.exports = {
     ropsten: {
       url: `https://ropsten.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [DEPLOYER_PRIVATE_KEY],
-      gasPrice: 26000000000,
     },
     bsctestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
@@ -47,6 +34,7 @@ module.exports = {
       url: "https://bsc-dataseed.binance.org/",
       chainId: 56,
       accounts: { mnemonic: BSC_MNEMONIC },
+      gasPrice: 6000000000, // in case of errors
     },
   },
   defaultNetwork: "ganache",
@@ -56,9 +44,15 @@ module.exports = {
     },
   },
   watcher: {
-    test: {
-      tasks: ["test"],
-      files: ["./contracts", "./test"],
+    test_stacking: {
+      tasks: [
+        { command: "compile", params: { quiet: true } },
+        {
+          command: "test",
+          params: { testFiles: ["test/Stacking.js"], logs: true },
+        },
+      ],
+      files: ["./contracts", "./test/Stacking.js"],
     },
   },
   etherscan: {

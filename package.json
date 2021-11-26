@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "dotenv": "^10.0.0",
+    "hardhat-tracer": "^1.0.0-alpha.6",
     "openzeppelin-solidity": "^4.2.0"
   }
 }
