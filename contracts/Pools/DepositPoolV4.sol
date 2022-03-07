@@ -5,9 +5,16 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/access/Ownable.sol";
 import "openzeppelin-solidity/contracts/utils/cryptography/ECDSA.sol";
 
-contract DepositPoolV3 is Ownable {
+contract DepositPoolV4 is Ownable {
     using ECDSA for bytes32;
-    mapping(address => uint256) public deposits;
+
+    struct Deposit {
+        uint256 amount;
+        uint256 rate;
+    }
+    mapping(address => mapping(uint256 => Deposit)) public deposits;
+    mapping(address => uint256) public depositsCount;
+    mapping(address => uint256) public depositsTotal;
 
     address manager = 0xe066FcA44c978Fe4A5F221dfda264dDF41d3E62d;
 
@@ -17,6 +24,8 @@ contract DepositPoolV3 is Ownable {
     uint256 public startDate;
     uint256 public closeDate;
     uint256 public paymentsReceived;
+    uint256 public tokensSold;
+
     uint256 private _divider = 10000;
     uint256 public minDeposit = 50 * 1e18;
     uint256 public maxDeposit = 5000 * 1e18;
@@ -24,7 +33,7 @@ contract DepositPoolV3 is Ownable {
     uint256 public goal;
     mapping(address => uint256) public nonces;
 
-    event Deposit(address participant, uint256 amount, uint256 newDepositTotal);
+    event DepositMade(address participant, uint256 amount, uint256 rate, uint256 newDepositTotal);
 
     constructor(
         address _paymentToken,
@@ -47,28 +56,34 @@ contract DepositPoolV3 is Ownable {
 
     function verifySig(
         uint256 amount,
+        uint256 rate,
         uint256 nonce,
         address account,
         bytes memory signature
     ) public view returns (bool) {
-        return keccak256(abi.encodePacked(amount, nonce, account, address(this))).toEthSignedMessageHash().recover(signature) == manager;
+        return keccak256(abi.encodePacked(amount, rate, nonce, account, address(this))).toEthSignedMessageHash().recover(signature) == manager;
     }
 
-    function deposit(uint256 amount, bytes memory signature) public {
+    function deposit(
+        uint256 amount,
+        uint256 rate,
+        bytes memory signature
+    ) public {
         require(saleActive(), "The sale is not active");
-        require(deposits[msg.sender] + amount >= minDeposit, "You cant invest such small amount");
-        require(deposits[msg.sender] + amount <= maxDeposit, "You cant invest such big amount");
+        require(depositsTotal[msg.sender] + amount >= minDeposit, "You cant invest such small amount");
+        require(depositsTotal[msg.sender] + amount <= maxDeposit, "You cant invest such big amount");
 
         require(paymentToken.balanceOf(msg.sender) >= amount, "You dont have enough funds to deposit");
         require(paymentToken.allowance(msg.sender, address(this)) >= amount, "Approve contract for spending your funds");
-        require(verifySig(amount, nonces[msg.sender], msg.sender, signature), "Off-chain error, probably KYC unconfirmed.");
+        require(verifySig(amount, rate, nonces[msg.sender], msg.sender, signature), "Off-chain error, probably KYC unconfirmed.");
 
         paymentToken.transferFrom(msg.sender, _receiver, amount);
-        deposits[msg.sender] += amount;
-        paymentsReceived += amount;
+        depositsCount[msg.sender] += 1;
+        depositsTotal[msg.sender] += amount;
+        deposits[msg.sender][depositsCount[msg.sender]] = Deposit(amount, rate);
         nonces[msg.sender] += 1;
 
-        emit Deposit(msg.sender, amount, deposits[msg.sender]);
+        emit DepositMade(msg.sender, amount, rate, depositsTotal[msg.sender]);
     }
 
     function setSaleDates(uint256 _startDate, uint256 _closeDate) external onlyOwner {
@@ -79,15 +94,6 @@ contract DepositPoolV3 is Ownable {
 
     function setSaleGoal(uint256 _goal) external onlyOwner {
         goal = _goal;
-    }
-
-    function updateDepositsData(address[] calldata _investors, uint256[] calldata _amounts) external onlyOwner {
-        uint256 _paymentsReceived = paymentsReceived;
-        for (uint32 i = 0; i < _investors.length; i++) {
-            deposits[_investors[i]] = _amounts[i];
-            _paymentsReceived += _amounts[i];
-        }
-        paymentsReceived = _paymentsReceived;
     }
 
     function setPaymentToken(address _paymentToken) external onlyOwner {

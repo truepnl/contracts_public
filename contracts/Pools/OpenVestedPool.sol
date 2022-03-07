@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-import "./Pool.sol";
+import "./OpenPool.sol";
 
-contract VestedPool is Pool {
+contract OpenVestedPool is OpenPool {
     uint256 public unlockPeriod;
     uint256 public totalUnlock;
     uint256 public cliff;
@@ -28,7 +28,7 @@ contract VestedPool is Pool {
         uint256 _cliff,
         uint256 _afterPurchaseCliff,
         uint256 _unlockPerPeriod
-    ) Pool(_paymentToken, _poolToken, _startDate, _closeDate, _goal) {
+    ) OpenPool(_paymentToken, _poolToken, _startDate, _closeDate, _goal) {
         poolType = PoolTypes.Vested;
 
         initialUnlock = _initialUnlock;
@@ -64,7 +64,7 @@ contract VestedPool is Pool {
         }
     }
 
-    function buy() public override(Pool) {
+    function buy() public override(OpenPool) {
         super.buy();
 
         if (afterPurchaseCliff == 0) {

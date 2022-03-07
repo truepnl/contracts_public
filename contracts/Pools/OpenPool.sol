@@ -4,11 +4,14 @@ pragma solidity ^0.8.2;
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/access/Ownable.sol";
 
-abstract contract Pool is Ownable {
+abstract contract OpenPool is Ownable {
     enum PoolTypes {
         Regular,
         Vested
     }
+
+    uint256 public ticketSize = 10000 * 1e18;
+    uint256 public rate = 2500;
 
     PoolTypes public poolType;
 
@@ -42,7 +45,7 @@ abstract contract Pool is Ownable {
 
     function canBuy(address wallet) public view returns (bool) {
         if (!saleActive()) return false;
-        if (allocations[wallet].amount == 0 || allocations[wallet].bought == true) return false;
+        if (allocations[wallet].bought == true) return false;
         return true;
     }
 
@@ -60,13 +63,13 @@ abstract contract Pool is Ownable {
         require(!hasBought(msg.sender), "Youve already bought tokens");
         require(paymentsReceived <= goal, "Sale goal reached");
 
-        uint256 rate = allocations[msg.sender].rate;
-        uint256 amount = allocations[msg.sender].amount;
-
+        uint256 amount = ticketSize;
         uint256 paymentToReceive = (amount * rate) / _divider;
 
         require(paymentToken.allowance(msg.sender, address(this)) >= paymentToReceive, "Payment token wasnt approved");
 
+        allocations[msg.sender].rate = rate;
+        allocations[msg.sender].amount = ticketSize;
         allocations[msg.sender].bought = true;
 
         paymentToken.transferFrom(msg.sender, _receiver, paymentToReceive);
