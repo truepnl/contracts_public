@@ -15,6 +15,8 @@ contract DepositPoolV4 is Ownable {
     mapping(address => mapping(uint256 => Deposit)) public deposits;
     mapping(address => uint256) public depositsCount;
     mapping(address => uint256) public depositsTotal;
+    uint256 public discountParticipants;
+    uint256 public noDiscountParticipants;
 
     address manager = 0xe066FcA44c978Fe4A5F221dfda264dDF41d3E62d;
 
@@ -54,6 +56,10 @@ contract DepositPoolV4 is Ownable {
         return (block.timestamp >= startDate && block.timestamp <= closeDate);
     }
 
+    function totalParticipants() public view returns (uint256) {
+        return discountParticipants + noDiscountParticipants;
+    }
+
     function verifySig(
         uint256 amount,
         uint256 rate,
@@ -67,17 +73,21 @@ contract DepositPoolV4 is Ownable {
     function deposit(
         uint256 amount,
         uint256 rate,
+        uint256 isDiscount,
         bytes memory signature
     ) public {
         require(saleActive(), "The sale is not active");
         require(depositsTotal[msg.sender] + amount >= minDeposit, "You cant invest such small amount");
         require(depositsTotal[msg.sender] + amount <= maxDeposit, "You cant invest such big amount");
-
         require(paymentToken.balanceOf(msg.sender) >= amount, "You dont have enough funds to deposit");
         require(paymentToken.allowance(msg.sender, address(this)) >= amount, "Approve contract for spending your funds");
         require(verifySig(amount, rate, nonces[msg.sender], msg.sender, signature), "Off-chain error, probably KYC unconfirmed.");
 
         paymentToken.transferFrom(msg.sender, _receiver, amount);
+
+        if (depositsCount[msg.sender] == 0 & isDiscount == true) discountParticipants++;
+        if (depositsCount[msg.sender] == 0 & isDiscount == false) noDiscountParticipants++;
+
         depositsCount[msg.sender] += 1;
         depositsTotal[msg.sender] += amount;
         deposits[msg.sender][depositsCount[msg.sender]] = Deposit(amount, rate);
