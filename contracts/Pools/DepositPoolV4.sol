@@ -73,7 +73,7 @@ contract DepositPoolV4 is Ownable {
     function deposit(
         uint256 amount,
         uint256 rate,
-        uint256 isDiscount,
+        bool isDiscount,
         bytes memory signature
     ) public {
         require(saleActive(), "The sale is not active");
@@ -85,8 +85,8 @@ contract DepositPoolV4 is Ownable {
 
         paymentToken.transferFrom(msg.sender, _receiver, amount);
 
-        if (depositsCount[msg.sender] == 0 & isDiscount == true) discountParticipants++;
-        if (depositsCount[msg.sender] == 0 & isDiscount == false) noDiscountParticipants++;
+        if (depositsCount[msg.sender] == 0 && isDiscount) discountParticipants++;
+        if (depositsCount[msg.sender] == 0 && !isDiscount) noDiscountParticipants++;
 
         depositsCount[msg.sender] += 1;
         depositsTotal[msg.sender] += amount;
