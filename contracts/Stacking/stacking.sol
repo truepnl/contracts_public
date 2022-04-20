@@ -68,6 +68,10 @@ contract PNLStacking is Ownable {
         return (((amount * apy)) * duration) / _apyDivider / 365 days;
     }
 
+    function setMinStackAmount(uint256 amnt) external onlyOwner {
+        _minStackAmount = amnt;
+    }
+
     function stack(uint256 PNLAmount, uint256 StackingTypeID) external {
         require(StackingTypeID < stackingTypes.length, "Stacking type isnt found");
         require(PNLAmount >= _minStackAmount, "You cant stack that few tokens");
