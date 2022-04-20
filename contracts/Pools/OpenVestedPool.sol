@@ -58,7 +58,7 @@ contract OpenVestedPool is OpenPool {
         } else {
             if (block.timestamp < startDate + afterPurchaseCliff + cliff) return 0;
             uint256 claimable = (((block.timestamp - startDate - afterPurchaseCliff - cliff) / unlockPeriod)) * tokenstToClaimPerPeriod + tokensToClaimAfterPurchase - claimed;
-            if (claimable > amount - claimed) return amount - claimable;
+            if (claimable > amount - claimed) return amount - claimed;
 
             return claimable;
         }

@@ -12,9 +12,11 @@ contract DepositPoolV4 is Ownable {
         uint256 amount;
         uint256 rate;
     }
-    mapping(address => mapping(uint256 => Deposit)) public deposits;
+    mapping(address => mapping(uint256 => Deposit)) public depositsEntries;
     mapping(address => uint256) public depositsCount;
-    mapping(address => uint256) public depositsTotal;
+    mapping(address => uint256) public pnlgDeposits;
+    mapping(address => uint256) public regularDeposits;
+
     uint256 public discountParticipants;
     uint256 public noDiscountParticipants;
 
@@ -60,6 +62,10 @@ contract DepositPoolV4 is Ownable {
         return discountParticipants + noDiscountParticipants;
     }
 
+    function deposits(address user) public view returns (uint256) {
+        return regularDeposits[user] + pnlgDeposits[user];
+    }
+
     function verifySig(
         uint256 amount,
         uint256 rate,
@@ -77,23 +83,26 @@ contract DepositPoolV4 is Ownable {
         bytes memory signature
     ) public {
         require(saleActive(), "The sale is not active");
-        require(depositsTotal[msg.sender] + amount >= minDeposit, "You cant invest such small amount");
-        require(depositsTotal[msg.sender] + amount <= maxDeposit, "You cant invest such big amount");
+        require(deposits(msg.sender) + amount >= minDeposit, "You cant invest such small amount");
+        require(deposits(msg.sender) + amount <= maxDeposit, "You cant invest such big amount");
         require(paymentToken.balanceOf(msg.sender) >= amount, "You dont have enough funds to deposit");
         require(paymentToken.allowance(msg.sender, address(this)) >= amount, "Approve contract for spending your funds");
         require(verifySig(amount, rate, nonces[msg.sender], msg.sender, signature), "Off-chain error, probably KYC unconfirmed.");
 
         paymentToken.transferFrom(msg.sender, _receiver, amount);
 
-        if (depositsCount[msg.sender] == 0 && isDiscount) discountParticipants++;
-        if (depositsCount[msg.sender] == 0 && !isDiscount) noDiscountParticipants++;
+        if (isDiscount) discountParticipants++;
+        if (!isDiscount) noDiscountParticipants++;
 
         depositsCount[msg.sender] += 1;
-        depositsTotal[msg.sender] += amount;
-        deposits[msg.sender][depositsCount[msg.sender]] = Deposit(amount, rate);
-        nonces[msg.sender] += 1;
+        if (isDiscount) pnlgDeposits[msg.sender] += amount;
+        if (!isDiscount) regularDeposits[msg.sender] += amount;
 
-        emit DepositMade(msg.sender, amount, rate, depositsTotal[msg.sender]);
+        depositsEntries[msg.sender][depositsCount[msg.sender]] = Deposit(amount, rate);
+        nonces[msg.sender] += 1;
+        paymentsReceived += amount;
+
+        emit DepositMade(msg.sender, amount, rate, deposits(msg.sender));
     }
 
     function setSaleDates(uint256 _startDate, uint256 _closeDate) external onlyOwner {
