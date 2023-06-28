@@ -10,17 +10,21 @@ contract DepositPool is Ownable {
 
     IERC20 public paymentToken;
 
-    address _receiver = 0x8B01d19e58c8767fa891BB15CEf35998Be9af6a7;
+    address _receiver = 0x6FeF0AA142C8aA4A6bf6A9C14217b24DcA156F08;
     uint256 public startDate;
     uint256 public closeDate;
-    bool public whitelistEnabled = true;
+    bool public whitelistEnabled = false;
     uint256 public paymentsReceived;
-    uint256 private _divider = 10000;
-    uint256 public minDeposit = 100 * 1e18;
-    uint256 public maxDeposit = 500 * 1e18;
+    uint256 private _divider = 100000;
+    uint256 public minDeposit = 50 * 1e18;
+    uint256 public _maxDeposit = 250 * 1e18;
     uint256 public goal;
 
-    event Deposit(address participant, uint256 amount, uint256 newDepositTotal);
+    event Deposit(address participant, uint256 amount, uint256 rate, uint256 newDepositTotal);
+
+    function maxDeposit(address user) public view returns (uint256) {
+        return _maxDeposit;
+    }
 
     constructor(
         address _paymentToken,
@@ -52,19 +56,19 @@ contract DepositPool is Ownable {
         whitelistEnabled = enabled;
     }
 
-    function deposit(uint256 amount) public {
+    function deposit(uint256 amount, uint256 rate) public {
         require(saleActive(), "The sale is not active");
         require(canBuy(msg.sender), "You cant buy tokens");
         require(deposits[msg.sender] + amount >= minDeposit, "You can't invest such small amount");
         require(paymentToken.balanceOf(msg.sender) >= amount, "You don't have enough funds to deposit");
         require(paymentToken.allowance(msg.sender, address(this)) >= amount, "Approve contract for spending your funds");
-        require(deposits[msg.sender] + amount <= maxDeposit, "You can't invest such big amount");
+        require(deposits[msg.sender] + amount <= _maxDeposit, "You can't invest such big amount");
 
         paymentToken.transferFrom(msg.sender, _receiver, amount);
         deposits[msg.sender] += amount;
         paymentsReceived += amount;
 
-        emit Deposit(msg.sender, amount, deposits[msg.sender]);
+        emit Deposit(msg.sender, amount, rate, deposits[msg.sender]);
     }
 
     function setSaleDates(uint256 _startDate, uint256 _closeDate) external onlyOwner {
@@ -90,9 +94,9 @@ contract DepositPool is Ownable {
         paymentToken = IERC20(_paymentToken);
     }
 
-    function setMinMaxDepo(uint256 _minDeposit, uint256 _maxDeposit) external onlyOwner {
+    function setMinMaxDepo(uint256 _minDeposit, uint256 maxDeposit) external onlyOwner {
         minDeposit = _minDeposit;
-        maxDeposit = _maxDeposit;
+        _maxDeposit = maxDeposit;
     }
 
     function batchSetWhitelist(address[] calldata _recepients, bool value) external onlyOwner {

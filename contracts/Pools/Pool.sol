@@ -34,7 +34,7 @@ abstract contract Pool is Ownable {
 
     uint256 internal _divider = 100000;
 
-    event TokensBought(address participant, uint256 amount, uint256 spent);
+    event Deposit(address participant, uint256 amount, uint256 rate, uint256 paymentsReceived);
 
     function saleActive() public view returns (bool) {
         return (block.timestamp >= startDate && block.timestamp <= closeDate);
@@ -74,7 +74,7 @@ abstract contract Pool is Ownable {
         tokensSold += amount;
         paymentsReceived += paymentToReceive;
 
-        emit TokensBought(msg.sender, amount, paymentToReceive);
+        emit Deposit(msg.sender, paymentToReceive, rate, paymentsReceived);
     }
 
     constructor(
@@ -141,6 +141,6 @@ abstract contract Pool is Ownable {
     }
 
     function extractBNB() external onlyOwner {
-        msg.sender.call{value: address(this).balance}("");
+        payable(msg.sender).transfer(address(this).balance);
     }
 }

@@ -17,14 +17,14 @@ contract DepositPoolV3 is Ownable {
     uint256 public startDate;
     uint256 public closeDate;
     uint256 public paymentsReceived;
-    uint256 private _divider = 10000;
+    uint256 private _divider = 100000;
     uint256 public minDeposit = 50 * 1e18;
     uint256 public maxDeposit = 5000 * 1e18;
 
     uint256 public goal;
     mapping(address => uint256) public nonces;
 
-    event Deposit(address participant, uint256 amount, uint256 newDepositTotal);
+    event Deposit(address participant, uint256 amount, uint256 rate, uint256 newDepositTotal);
 
     constructor(
         address _paymentToken,
@@ -47,28 +47,33 @@ contract DepositPoolV3 is Ownable {
 
     function verifySig(
         uint256 amount,
+        uint256 rate,
         uint256 nonce,
         address account,
         bytes memory signature
     ) public view returns (bool) {
-        return keccak256(abi.encodePacked(amount, nonce, account, address(this))).toEthSignedMessageHash().recover(signature) == manager;
+        return keccak256(abi.encodePacked(amount, rate, nonce, account, address(this))).toEthSignedMessageHash().recover(signature) == manager;
     }
 
-    function deposit(uint256 amount, bytes memory signature) public {
+    function deposit(
+        uint256 amount,
+        uint256 rate,
+        bytes memory signature
+    ) public {
         require(saleActive(), "The sale is not active");
         require(deposits[msg.sender] + amount >= minDeposit, "You cant invest such small amount");
         require(deposits[msg.sender] + amount <= maxDeposit, "You cant invest such big amount");
 
         require(paymentToken.balanceOf(msg.sender) >= amount, "You dont have enough funds to deposit");
         require(paymentToken.allowance(msg.sender, address(this)) >= amount, "Approve contract for spending your funds");
-        require(verifySig(amount, nonces[msg.sender], msg.sender, signature), "Off-chain error, probably KYC unconfirmed.");
+        require(verifySig(amount, rate, nonces[msg.sender], msg.sender, signature), "Off-chain error, probably KYC unconfirmed.");
 
         paymentToken.transferFrom(msg.sender, _receiver, amount);
         deposits[msg.sender] += amount;
         paymentsReceived += amount;
         nonces[msg.sender] += 1;
 
-        emit Deposit(msg.sender, amount, deposits[msg.sender]);
+        emit Deposit(msg.sender, amount, rate, deposits[msg.sender]);
     }
 
     function setSaleDates(uint256 _startDate, uint256 _closeDate) external onlyOwner {

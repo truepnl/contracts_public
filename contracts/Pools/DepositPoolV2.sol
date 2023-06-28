@@ -17,11 +17,11 @@ contract DepositPoolV2 is Ownable {
     uint256 public closeDate;
     bool public whitelistEnabled = true;
     uint256 public paymentsReceived;
-    uint256 private _divider = 10000;
+    uint256 private _divider = 100000;
     uint256 public minDeposit = 100 * 1e18;
     uint256 public goal;
 
-    event Deposit(address participant, uint256 amount, uint256 newDepositTotal);
+    event Deposit(address participant, uint256 amount, uint256 rate, uint256 newDepositTotal);
 
     constructor(
         address _paymentToken,
@@ -53,7 +53,7 @@ contract DepositPoolV2 is Ownable {
         whitelistEnabled = enabled;
     }
 
-    function deposit(uint256 amount) public {
+    function deposit(uint256 amount, uint256 rate) public {
         require(saleActive(), "The sale is not active");
         require(canBuy(msg.sender), "You cant buy tokens");
         require(deposits[msg.sender] + amount >= minDeposit, "You can't invest such small amount");
@@ -65,7 +65,7 @@ contract DepositPoolV2 is Ownable {
         deposits[msg.sender] += amount;
         paymentsReceived += amount;
 
-        emit Deposit(msg.sender, amount, deposits[msg.sender]);
+        emit Deposit(msg.sender, amount, rate, deposits[msg.sender]);
     }
 
     function setSaleDates(uint256 _startDate, uint256 _closeDate) external onlyOwner {

@@ -10,8 +10,8 @@ abstract contract OpenPool is Ownable {
         Vested
     }
 
-    uint256 public ticketSize = 10000 * 1e18;
-    uint256 public rate = 2500;
+    uint256 public ticketSize = 33333 * 1e17;
+    uint256 public rate = 7500;
 
     PoolTypes public poolType;
 
